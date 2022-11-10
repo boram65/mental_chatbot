@@ -5,6 +5,15 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import json
 
+
+from flask import Flask
+
+app = Flask(__name__)
+
+# @app.route("/hello", methods=['GET'])
+# def hello():
+#   return "hello world"
+
 @st.cache(allow_output_mutation=True)
 def cached_model():
     model = SentenceTransformer('jhgan/ko-sroberta-multitask')
@@ -32,7 +41,7 @@ with st.form('form', clear_on_submit=True):
     user_input = st.text_input('당신: ', '')
     submitted = st.form_submit_button('전송')
 
-if submitted and user_input:
+if submitted and user_input:    #입력에 된 상태에서 버튼 누르면 실행
     embedding = model.encode(user_input)
 
     df['distance'] = df['embedding'].map(lambda x: cosine_similarity([embedding], [x]).squeeze())
@@ -40,8 +49,12 @@ if submitted and user_input:
 
     st.session_state.past.append(user_input)
     st.session_state.generated.append(answer['챗봇'])
-
+    
+    
 for i in range(len(st.session_state['past'])):
     message(st.session_state['past'][i], is_user=True, key=str(i) + '_user')
     if len(st.session_state['generated']) > i:
         message(st.session_state['generated'][i], key=str(i) + '_bot')
+
+
+
